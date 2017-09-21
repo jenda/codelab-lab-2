@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.ProgressBar;
 
 import com.codepath.android.booksearch.R;
 import com.codepath.android.booksearch.adapters.BookAdapter;
@@ -35,6 +36,26 @@ public class BookListActivity extends AppCompatActivity {
     private BookAdapter bookAdapter;
     private BookClient client;
     private ArrayList<Book> abooks;
+    MenuItem miActionProgressItem;
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        // Store instance of the menu item containing progress
+        miActionProgressItem = menu.findItem(R.id.miActionProgress);
+        // Extract the action-view from the menu item
+        ProgressBar v =  (ProgressBar) MenuItemCompat.getActionView(miActionProgressItem);
+        // Return to finish
+        return super.onPrepareOptionsMenu(menu);
+    }
+    public void showProgressBar() {
+        // Show progress item
+        miActionProgressItem.setVisible(true);
+    }
+
+    public void hideProgressBar() {
+        // Hide progress item
+        miActionProgressItem.setVisible(false);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +75,7 @@ public class BookListActivity extends AppCompatActivity {
         rvBooks.setLayoutManager(new LinearLayoutManager(this));
 
         // Fetch the data remotely
-        fetchBooks("Oscar Wilde");
+//        fetchBooks("Oscar Wilde");
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         Log.d("jenda", "toolbar " + (toolbar == null));
@@ -77,6 +98,8 @@ public class BookListActivity extends AppCompatActivity {
     // Executes an API call to the OpenLibrary search endpoint, parses the results
     // Converts them into an array of book objects and adds them to the adapter
     private void fetchBooks(String query) {
+        showProgressBar();
+
         client = new BookClient();
         client.getBooks(query, new JsonHttpResponseHandler() {
             @Override
@@ -99,6 +122,8 @@ public class BookListActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     // Invalid JSON format, show appropriate error.
                     e.printStackTrace();
+                } finally {
+                    hideProgressBar();
                 }
             }
 
